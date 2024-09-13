@@ -61,7 +61,6 @@ b_vi = np.array([3000, 3000, 3000, 3000, 3000])
 a_s = np.array([5600, 5384.615, 5177.515, 4978.38, 4786.903])
 b_s = np.array([7200, 7200, 7200, 7200, 7200])
 
-
 # Create the data dictionary
 data = {}
 for year in years:
@@ -75,8 +74,8 @@ for year in years:
 for key, year in zip(data.keys(), years):
     data[key]['Year'] = np.full(shape=annual_maintenance_no, fill_value=year)
     data[key]['Maintenance No.'] = np.arange(annual_maintenance_no) + 1
-    data[key]['Planned Cost'] = a_vi[year-1]*data[key]['Maintenance No.'] + b_vi[year-1]
-    data[key]['Unplanned Cost'] = a_s[year-1]/data[key]['Maintenance No.'] + b_s[year-1]
+    data[key]['Planned Cost'] = a_vi[year - 1] * data[key]['Maintenance No.'] + b_vi[year - 1]
+    data[key]['Unplanned Cost'] = a_s[year - 1] / data[key]['Maintenance No.'] + b_s[year - 1]
     data[key]['Total Cost'] = data[key]['Planned Cost'] + data[key]['Unplanned Cost']
 
 plot_data(data)
@@ -87,16 +86,15 @@ x_train, y_train = np.empty(shape=(0, 2)), np.empty(shape=(0, 1))
 x_test, y_test = np.empty(shape=(0, 2)), np.empty(shape=(0, 1))
 
 for year in years:
-    year_no =  data['Year ' + str(year)]['Year']
+    year_no = data['Year ' + str(year)]['Year']
     maintenance_no = data['Year ' + str(year)]['Maintenance No.']
     total_cost = data['Year ' + str(year)]['Total Cost']
     x_temp = np.array([year_no, maintenance_no]).transpose()
     y_temp = np.array([total_cost]).transpose()
-    x_train = np.append(x_train, x_temp[0:int(0.8*annual_maintenance_no), :], axis=0)
-    y_train = np.append(y_train, y_temp[0:int(0.8*annual_maintenance_no), :], axis=0)
-    x_test = np.append(x_test, x_temp[int(0.8*annual_maintenance_no):, :], axis=0)
-    y_test = np.append(y_test, y_temp[int(0.8*annual_maintenance_no):, :], axis=0)
-
+    x_train = np.append(x_train, x_temp[0:int(0.8 * annual_maintenance_no), :], axis=0)
+    y_train = np.append(y_train, y_temp[0:int(0.8 * annual_maintenance_no), :], axis=0)
+    x_test = np.append(x_test, x_temp[int(0.8 * annual_maintenance_no):, :], axis=0)
+    y_test = np.append(y_test, y_temp[int(0.8 * annual_maintenance_no):, :], axis=0)
 
 # Normalize data
 scaler_std = StandardScaler()
@@ -119,7 +117,6 @@ if not os.path.isfile('models/model_nn_reciprocal_split.h5'):
 else:
     model_nn = load_model('models/model_nn_reciprocal_split.h5')
 
-
 # Evaluate
 y_predicted = model_nn.predict(x_test)
 y_predicted = scaler_minmax.inverse_transform(y_predicted)
@@ -135,14 +132,13 @@ print('Overall Metrics:')
 print('RMSE %.2f, MAE %.2f, R^2 score %.2f, Correlation coefficient %.2f (p=%.4f)'
       % (RMSE, MAE, r_2, corr[0][0], corr[1][0]))
 
-
 # Metrics for each year
 # Split into 5 arrays 1 for each year
 y_predicted = np.split(y_predicted, indices_or_sections=5)
 y_test = np.split(y_test, indices_or_sections=5)
 y_train = np.split(y_train, indices_or_sections=5)
 
-for year, year_index in zip(years, years-1):
+for year, year_index in zip(years, years - 1):
     RMSE = root_mean_squared_error(y_true=y_test[year_index], y_pred=y_predicted[year_index])
     MAE = mean_absolute_error(y_true=y_test[year_index], y_pred=y_predicted[year_index])
     r_2 = r2_score(y_true=y_test[year_index], y_pred=y_predicted[year_index])
@@ -156,10 +152,10 @@ for year, year_index in zip(years, years-1):
     ax.plot(data['Year ' + str(year)]['Maintenance No.'],
             np.concatenate((y_train[year_index], y_test[year_index]), axis=0),
             label='Actual')
-    ax.plot(data['Year ' + str(year)]['Maintenance No.'][int(0.8*annual_maintenance_no):],
+    ax.plot(data['Year ' + str(year)]['Maintenance No.'][int(0.8 * annual_maintenance_no):],
             y_predicted[year_index],
             linestyle='--', label='Predicted')
-    ax.axvline(x=int(0.8*annual_maintenance_no),  ymin=0, ymax=1, linestyle='dotted', linewidth=1, color='grey')
+    ax.axvline(x=int(0.8 * annual_maintenance_no), ymin=0, ymax=1, linestyle='dotted', linewidth=1, color='grey')
     ax.set_ylim(0, 25000)
     ax.set_ylabel('Euros')
     ax.set_xlabel('Number of maintenance  procedures')
@@ -168,8 +164,8 @@ for year, year_index in zip(years, years-1):
 
     fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(6.5, 3), layout='constrained')
     ax.set_title('Network Error - Year ' + str(year))
-    ax.plot(data['Year ' + str(year)]['Maintenance No.'][int(0.8*annual_maintenance_no):],
-            y_test[year_index]-y_predicted[year_index], zorder=3)
+    ax.plot(data['Year ' + str(year)]['Maintenance No.'][int(0.8 * annual_maintenance_no):],
+            y_test[year_index] - y_predicted[year_index], zorder=3)
     ax.axhline(y=0, linestyle='dotted', linewidth=1, color='grey', zorder=1)
     ax.set_ylabel('Euros')
     ax.set_xlabel('Number of maintenance  procedures')

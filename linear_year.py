@@ -54,7 +54,7 @@ learning_rate = 0.0001
 annual_maintenance_no = 720
 years = np.array([1, 2, 3, 4, 5])
 years_train = np.array([1, 2, 3, 4])
-years_test = np.array([5])        # it has to be 1 year
+years_test = np.array([5])  # it has to be 1 year
 
 # Planned cost (k_i)
 a_vi = np.array([9.56, 10.516, 11.5676, 12.7244, 13.9968])
@@ -63,7 +63,6 @@ b_vi = np.array([3000, 3000, 3000, 3000, 3000])
 # Unplanned cost (Linear)
 a_s = np.array([6, 6.6, 7.26, 7.986, 8.7846])
 b_s = np.array([7200, 7200, 7200, 7200, 7200])
-
 
 # Create the data dictionary
 data = {}
@@ -78,10 +77,9 @@ for year in years:
 for key, year in zip(data.keys(), years):
     data[key]['Year'] = np.full(shape=annual_maintenance_no, fill_value=year)
     data[key]['Maintenance No.'] = np.arange(annual_maintenance_no) + 1
-    data[key]['Planned Cost'] = a_vi[year-1]*data[key]['Maintenance No.'] + b_vi[year-1]
-    data[key]['Unplanned Cost'] = -a_s[year-1]*data[key]['Maintenance No.'] + b_s[year-1]
+    data[key]['Planned Cost'] = a_vi[year - 1] * data[key]['Maintenance No.'] + b_vi[year - 1]
+    data[key]['Unplanned Cost'] = -a_s[year - 1] * data[key]['Maintenance No.'] + b_s[year - 1]
     data[key]['Total Cost'] = data[key]['Planned Cost'] + data[key]['Unplanned Cost']
-
 
 # Splitting the data
 # Final year for testing
@@ -89,7 +87,7 @@ x_train, y_train = np.empty(shape=(0, 2)), np.empty(shape=(0, 1))
 x_test, y_test = np.empty(shape=(0, 2)), np.empty(shape=(0, 1))
 
 for year in years_train:
-    year_no =  data['Year ' + str(year)]['Year']
+    year_no = data['Year ' + str(year)]['Year']
     maintenance_no = data['Year ' + str(year)]['Maintenance No.']
     total_cost = data['Year ' + str(year)]['Total Cost']
     x_temp = np.array([year_no, maintenance_no]).transpose()
@@ -98,7 +96,7 @@ for year in years_train:
     y_train = np.append(y_train, y_temp, axis=0)
 
 for year in years_test:
-    year_no =  data['Year ' + str(year)]['Year']
+    year_no = data['Year ' + str(year)]['Year']
     maintenance_no = data['Year ' + str(year)]['Maintenance No.']
     total_cost = data['Year ' + str(year)]['Total Cost']
     x_temp = np.array([year_no, maintenance_no]).transpose()
@@ -127,12 +125,10 @@ if not os.path.isfile('models/model_nn_linear_years.h5'):
 else:
     model_nn = load_model('models/model_nn_linear_years.h5')
 
-
 # Evaluate
 y_predicted = model_nn.predict(x_test)
 y_predicted = scaler_minmax.inverse_transform(y_predicted)
 y_test = scaler_minmax.inverse_transform(y_test)
-
 
 RMSE = root_mean_squared_error(y_true=y_test, y_pred=y_predicted)
 MAE = mean_absolute_error(y_true=y_test, y_pred=y_predicted)
@@ -141,7 +137,6 @@ corr = pearsonr(x=y_test, y=y_predicted)
 print('Metrics:')
 print('RMSE %.2f, MAE %.2f, R^2 score %.2f, Correlation coefficient %.2f (p=%.4f)'
       % (RMSE, MAE, r_2, corr[0][0], corr[1][0]))
-
 
 fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(6.5, 3), layout='constrained')
 ax.set_title('Total Cost - Year ' + str(years_test[0]))
@@ -155,7 +150,7 @@ plt.show()
 
 fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(6.5, 3), layout='constrained')
 ax.set_title('Network Error - Year ' + str(years_test[0]))
-ax.plot(data['Year ' + str(years_test[0])]['Maintenance No.'], y_test-y_predicted, zorder=2)
+ax.plot(data['Year ' + str(years_test[0])]['Maintenance No.'], y_test - y_predicted, zorder=2)
 ax.axhline(y=0, linestyle='dotted', linewidth=1, color='grey', zorder=1)
 ax.set_ylabel('Euros')
 ax.set_xlabel('Number of maintenance  procedures')

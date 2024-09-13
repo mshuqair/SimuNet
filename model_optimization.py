@@ -8,7 +8,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 
-
 def build_model(hp):
     kernel_init = GlorotUniform(seed=1)
     optimizer = Adam(learning_rate=0.0001)
@@ -18,7 +17,8 @@ def build_model(hp):
     loss_function = hp.Choice(name='loss_function', values=['huber_loss'])
 
     layer_input = Input(shape=2, name='layer_input')
-    layer_h1 = Dense(units=layer_h1_units, activation='relu', kernel_initializer=kernel_init, name='layer_h1')(layer_input)
+    layer_h1 = Dense(units=layer_h1_units, activation='relu', kernel_initializer=kernel_init, name='layer_h1')(
+        layer_input)
     # layer_h2 = Dense(units=layer_h2_units, activation='relu', kernel_initializer=kernel_init, name='layer_h2')(layer_h1)
     layer_output = Dense(units=1, activation=None, kernel_initializer=kernel_init, name='layer_output')(layer_h1)
 
@@ -45,7 +45,6 @@ b_vi = np.array([3000, 3000, 3000, 3000, 3000])
 a_s = np.array([6, 6.6, 7.26, 7.986, 8.7846])
 b_s = np.array([7200, 7200, 7200, 7200, 7200])
 
-
 # Create the data dictionary
 data = {}
 for year in years:
@@ -59,10 +58,9 @@ for year in years:
 for key, year in zip(data.keys(), years):
     data[key]['Year'] = np.full(shape=annual_maintenance_no, fill_value=year)
     data[key]['Maintenance No.'] = np.arange(annual_maintenance_no) + 1
-    data[key]['Planned Cost'] = a_vi[year-1]*data[key]['Maintenance No.'] + b_vi[year-1]
-    data[key]['Unplanned Cost'] = -a_s[year-1]*data[key]['Maintenance No.'] + b_s[year-1]
+    data[key]['Planned Cost'] = a_vi[year - 1] * data[key]['Maintenance No.'] + b_vi[year - 1]
+    data[key]['Unplanned Cost'] = -a_s[year - 1] * data[key]['Maintenance No.'] + b_s[year - 1]
     data[key]['Total Cost'] = data[key]['Planned Cost'] + data[key]['Unplanned Cost']
-
 
 # Splitting the data
 # 0.8 for training and 0.2 for testing for each year
@@ -70,16 +68,15 @@ x_train, y_train = np.empty(shape=(0, 2)), np.empty(shape=(0, 1))
 x_test, y_test = np.empty(shape=(0, 2)), np.empty(shape=(0, 1))
 
 for year in years:
-    year_no =  data['Year ' + str(year)]['Year']
+    year_no = data['Year ' + str(year)]['Year']
     maintenance_no = data['Year ' + str(year)]['Maintenance No.']
     total_cost = data['Year ' + str(year)]['Total Cost']
     x_temp = np.array([year_no, maintenance_no]).transpose()
     y_temp = np.array([total_cost]).transpose()
-    x_train = np.append(x_train, x_temp[0:int(0.8*annual_maintenance_no), :], axis=0)
-    y_train = np.append(y_train, y_temp[0:int(0.8*annual_maintenance_no), :], axis=0)
-    x_test = np.append(x_test, x_temp[int(0.8*annual_maintenance_no):, :], axis=0)
-    y_test = np.append(y_test, y_temp[int(0.8*annual_maintenance_no):, :], axis=0)
-
+    x_train = np.append(x_train, x_temp[0:int(0.8 * annual_maintenance_no), :], axis=0)
+    y_train = np.append(y_train, y_temp[0:int(0.8 * annual_maintenance_no), :], axis=0)
+    x_test = np.append(x_test, x_temp[int(0.8 * annual_maintenance_no):, :], axis=0)
+    y_test = np.append(y_test, y_temp[int(0.8 * annual_maintenance_no):, :], axis=0)
 
 # Normalize data
 scaler_std = StandardScaler()
@@ -91,10 +88,8 @@ scaler_minmax = MinMaxScaler(feature_range=(0, 1))
 y_train = scaler_minmax.fit_transform(y_train)
 y_test = scaler_minmax.transform(y_test)
 
-
 # Split the data into training and validation percentage-wise
 x_train, x_valid, y_train, y_valid = train_test_split(x_train, y_train, test_size=0.2, shuffle=True)
-
 
 # using Grid Search method
 tuner = GridSearch(hypermodel=build_model, objective='val_loss', max_trials=None,
