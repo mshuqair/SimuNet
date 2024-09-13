@@ -169,7 +169,8 @@ for year, year_index in zip(years, years-1):
     fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(6.5, 3), layout='constrained')
     ax.set_title('Network Error - Year ' + str(year))
     ax.plot(data['Year ' + str(year)]['Maintenance No.'][int(0.8*annual_maintenance_no):],
-            y_test[year_index]-y_predicted[year_index])
+            y_test[year_index]-y_predicted[year_index], zorder=3)
+    ax.axhline(y=0, linestyle='dotted', linewidth=1, color='grey', zorder=1)
     ax.set_ylabel('Euros')
     ax.set_xlabel('Number of maintenance  procedures')
     plt.show()
